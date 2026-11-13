@@ -65,3 +65,12 @@ Load `references/mind-protocol.md` when running: it defines the banner step, del
 - Final Call: build, revise, stop, or implementation outcome — with the next concrete step
 
 The Council verdict is necessary but not sufficient authorization to write code. Hyper implements only the unchanged, approved scope and verifies it before completion.
+
+## Input identity and completion in this fork
+
+Follow [verified sessions](../codex-council/references/verified-sessions.md) for repository work. Bind the actual
+inputs and selected repository instructions before dispatch or final verification.
+For Truey repositories, select `--repository-profile truey`. Preserve stricter
+project workflows. Collect real observations and run `validate-completion` before
+claiming verified completion; `validate-session` proves structure only.
+A changed implementation needs a new final-verification session.

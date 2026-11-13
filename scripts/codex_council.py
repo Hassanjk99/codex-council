@@ -22,9 +22,10 @@ from pathlib import Path
 from typing import Any, Optional
 
 try:
-    from . import council_cells, council_interview
+    from . import council_cells, council_interview, council_provenance
 except ImportError:  # Direct execution: python3 scripts/codex_council.py
     import council_interview
+    import council_provenance
     import council_cells  # type: ignore[no-redef]
 
 
@@ -3488,7 +3489,14 @@ def main() -> None:
     update_parser.add_argument("--latest-version", help="Bypass network and compare against this version")
     update_parser.add_argument("--json", action="store_true", help="Print machine-readable JSON")
 
+    council_provenance.add_parsers(subparsers)
     args = parser.parse_args()
+    if args.command in {"bind-inputs", "freshness", "record-evidence", "run-check", "validate-completion", "handoff"}:
+        try:
+            raise SystemExit(council_provenance.handle(args))
+        except (OSError, ValueError, KeyError, TypeError) as exc:
+            parser.error(str(exc))
+
 
     if args.command == "interview":
         try:

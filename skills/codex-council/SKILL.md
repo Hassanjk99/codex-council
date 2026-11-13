@@ -81,3 +81,12 @@ Optional frontend gate:
 ## Output Rule
 
 Normal chat final: 8-14 bullets. Formal report: use `output-contract.md`. Expand only for blockers, evidence, or explicit user request.
+
+## Input identity and completion in this fork
+
+Follow [verified sessions](references/verified-sessions.md) for repository work. Bind the actual
+inputs and selected repository instructions before dispatch or final verification.
+For Truey repositories, select `--repository-profile truey`. Preserve stricter
+project workflows. Collect real observations and run `validate-completion` before
+claiming verified completion; `validate-session` proves structure only.
+A changed implementation needs a new final-verification session.

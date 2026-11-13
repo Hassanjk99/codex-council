@@ -1,13 +1,13 @@
 {
   "name": "codex-council",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Design complex features from scratch with adaptive interviews, bounded specialist review and verified implementation.",
   "author": {
     "name": "ercoledevs",
     "url": "https://github.com/ercoledevs"
   },
   "homepage": "https://ercoledevs.github.io/codex-council/",
-  "repository": "https://github.com/ercoledevs/codex-council",
+  "repository": "https://github.com/Hassanjk99/codex-council",
   "license": "MIT",
   "keywords": [
     "codex",
@@ -20,9 +20,9 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "Codex Council",
-    "shortDescription": "Architecture design and review",
-    "longDescription": "Mind guides adaptive architecture interviews. Forge turns settled decisions into a proposal, Council challenges it at simple, mid or ultra effort, and Hyper builds the authorized scope with executed checks. Local briefs, estimates, role tuning and optional shadow replay keep decisions traceable.",
+    "displayName": "Codex Council (verified fork)",
+    "shortDescription": "Reviews with input identity and evidence",
+    "longDescription": "Mind guides adaptive architecture interviews. Forge turns settled decisions into a proposal, Council challenges it at simple, mid or ultra effort, and Hyper builds the authorized scope with executed checks. Local briefs, estimates, role tuning and optional shadow replay keep decisions traceable. This fork adds input freshness, completion validation and an optional Truey profile.",
     "developerName": "ercoledevs",
     "category": "Productivity",
     "capabilities": [

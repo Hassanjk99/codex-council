@@ -172,3 +172,12 @@ paired, repeated tasks establish them.
 - Verification: `PASS`, `FAIL`, or `UNKNOWN` per required check
 - Residual risk and rollback
 - Blockers or unverified claims
+
+## Input identity and completion in this fork
+
+Follow [verified sessions](../codex-council/references/verified-sessions.md) for repository work. Bind the actual
+inputs and selected repository instructions before dispatch or final verification.
+For Truey repositories, select `--repository-profile truey`. Preserve stricter
+project workflows. Collect real observations and run `validate-completion` before
+claiming verified completion; `validate-session` proves structure only.
+A changed implementation needs a new final-verification session.

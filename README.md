@@ -1,3 +1,21 @@
+# Verified Council fork
+
+This is Hassan's fork of [ercoledevs/codex-council](https://github.com/ercoledevs/codex-council).
+It preserves the upstream workflow and adds input freshness, completion evidence
+and an optional Truey repository profile. See the
+[verified-session guide](skills/codex-council/references/verified-sessions.md).
+
+Install this fork with the native Codex CLI:
+
+```bash
+codex plugin marketplace add Hassanjk99/codex-council --ref main
+codex plugin add codex-council@hassanjk99-council
+```
+
+Start a new Codex chat after installation. For local development, add the checkout
+path as the marketplace source instead of the GitHub repository. The remaining
+handbook describes the upstream workflow; use the fork commands above to install.
+
 # ![Codex Council](assets/cover.svg)
 
 Codex Council is a plugin for designing and building software with Codex. Start with a feature you want or a proposal you want challenged. The agents ask about decisions that change the design, record disagreements, and turn the agreed scope into code with acceptance tests.
@@ -101,3 +119,11 @@ python3 scripts/codex_council.py validate --plugin-root . --strict
 I built Codex Council because one Codex pass can blur the line between judging a design and proving that it works. I wanted a way to inspect each step and see which checks actually ran.
 
 I maintain the project independently. If it helps your work, you can [support development via PayPal](https://www.paypal.me/SalvatoreErcole117).
+
+## Fork additions
+
+This fork adds scoped input manifests, freshness checks, recorded evidence,
+completion validation and an optional Truey repository profile. Upstream scoring
+and structural validation are unchanged. Read the
+[verified-session workflow](skills/codex-council/references/verified-sessions.md).
+No GitHub posting, deployment or project-status mutation is performed.

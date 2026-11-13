@@ -1,0 +1,20 @@
+{
+  "name": "hassanjk99-council",
+  "interface": {
+    "displayName": "Hassan's verified Council"
+  },
+  "plugins": [
+    {
+      "name": "codex-council",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
