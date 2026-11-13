@@ -146,6 +146,31 @@ class ProvenanceTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'environment must match'):
             self.record(environment='ci', pr_head='b'*40)
 
+    def test_new_ignored_nested_instruction_owner_invalidates_evidence(self):
+        directory = self.root / 'feature'
+        directory.mkdir()
+        (directory / 'app.py').write_text('value = 1')
+        (self.root / '.gitignore').write_text('feature/AGENTS.md\n')
+        self.bind(['feature'])
+        (directory / 'AGENTS.md').write_text('New instruction applies to this source')
+        self.assertEqual(p.freshness(self.session)['changed'], ['instructions:feature/AGENTS.md'])
+
+    def test_malformed_evidence_and_metadata_are_incomplete_not_tracebacks(self):
+        self.bind()
+        self.finish()
+        path = next((self.session / 'evidence-records').glob('*.json'))
+        value = p.read_json(path)
+        value['artifact_hashes'] = []
+        value['record_id'] = p.digest({k: v for k, v in value.items() if k != 'record_id'})
+        p.write_json(path, value)
+        result = p.validate_completion(self.session)
+        self.assertEqual(result['complete'], False)
+        self.assertIn('evidence artifact hashes must be an object', result['problems'])
+        (self.session / 'session.json').write_text('[]')
+        result = self.cli('validate-completion', '--session', self.session)
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn('session metadata must be an object', json.loads(result.stdout)['problems'])
+
     def test_ci_is_bound_to_the_exact_pr_head(self):
         self.plan['criteria'][0]['environment'] = 'ci'
         self.bind(pr={'url': 'https://github.com/example/repo/pull/1', 'base': 'a'*40, 'head': 'b'*40})
@@ -191,7 +216,7 @@ class ProvenanceTests(unittest.TestCase):
         self.assertIn('Nested ownership rule', (self.session / p.PROFILE).read_text())
         for prompt in (self.session / 'prompts').rglob('*.md'):
             self.assertIn(str(self.session / p.PROFILE), prompt.read_text())
-        prompt.write_text(prompt.read_text() + 'Changed dispatch context')
+        (self.session / 'prompts' / 'extra.md').write_text('Additional dispatch context')
         self.assertEqual(p.freshness(self.session)['state'], 'stale')
 
     def test_semantically_invalid_persisted_evidence_cannot_pass(self):

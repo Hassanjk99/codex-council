@@ -21,7 +21,7 @@ SCHEMA = 1
 INPUTS = 'input-manifest.json'
 PLAN = 'completion-requirements.json'
 PROFILE = 'repository-instructions.md'
-SHA = re.compile(r'^[0-9a-f]{40,64}$')
+SHA = re.compile(r'^(?:[0-9a-f]{40}|[0-9a-f]{64})$')
 ENVIRONMENTS = {'local', 'ci', 'deployed', 'browser'}
 TRUEY_INSTRUCTIONS = (
     'AGENTS.md', 'DOCTRINE.md', 'TESTING.md', 'openspec/AGENTS.md',
@@ -124,6 +124,8 @@ def inventory(root, scopes):
 
 def required_contributions(session):
     meta = read_json(session / 'session.json')
+    if not isinstance(meta, dict):
+        raise ValueError('session metadata must be an object')
     inputs = read_json(session / 'prompts/synthesis-inputs.json')['inputs']
     names = []
     for group in ('members', 'reviewers', 'evidence_runners'):
@@ -172,9 +174,11 @@ def current_inputs(session, manifest):
     root = Path(manifest['workspace_root'])
     if not root.is_dir():
         raise ValueError('source workspace is unavailable')
+    names = instruction_names(root, manifest['scopes'], manifest['explicit_instruction_paths'], manifest['profile'])
     return {'source': inventory(root, manifest['scopes']),
-            'instructions': {name: file_hash(root, name) for name in manifest['instruction_paths']},
-            'session_inputs': {name: file_hash(session, name) for name in manifest['session_paths']}}
+            'instructions': {name: file_hash(root, name) for name in names},
+            'session_inputs': {name: file_hash(session, name) for name in sorted(set(manifest['session_paths']) |
+                {path.relative_to(session).as_posix() for path in (session / 'prompts').rglob('*') if path.is_file()})}}
 
 
 def load_manifest(session):
@@ -190,7 +194,10 @@ def bind_inputs(session, scopes, instructions, profile, requirements, pr=None):
     session = session.resolve(strict=True)
     if (session / INPUTS).exists():
         raise ValueError('session is already bound; start a new session')
-    root = Path(read_json(session / 'session.json')['workspace_root']).resolve(strict=True)
+    metadata = read_json(session / 'session.json')
+    if not isinstance(metadata, dict):
+        raise ValueError('session metadata must be an object')
+    root = Path(metadata['workspace_root']).resolve(strict=True)
     if session == root or root in session.parents:
         raise ValueError('session artifacts must be outside the source workspace')
     scopes = sorted(set(relative(x) for x in scopes))
@@ -221,7 +228,8 @@ def bind_inputs(session, scopes, instructions, profile, requirements, pr=None):
     paths += [p.relative_to(session).as_posix() for p in sorted((session / 'prompts').rglob('*')) if p.is_file()]
     manifest = {'schema_version': SCHEMA, 'workspace_root': str(root), 'scopes': scopes,
                 'repository': git(root, 'rev-parse', '--show-toplevel').decode().strip(),
-                'profile': profile, 'instruction_paths': names, 'session_paths': paths,
+                'profile': profile, 'instruction_paths': names,
+                'explicit_instruction_paths': instructions, 'session_paths': paths,
                 'required_contributions': contributions, 'pr': pr}
     before = current_inputs(session, manifest)
     if any(before['instructions'][name]['sha256'] != hashlib.sha256(data).hexdigest()
@@ -241,8 +249,8 @@ def freshness(session, current_pr_head=None):
         current = current_inputs(session, manifest)
         changed = []
         for group in ('instructions', 'session_inputs'):
-            changed.extend(f'{group}:{name}' for name in manifest['inputs'][group]
-                           if current[group].get(name) != manifest['inputs'][group][name])
+            changed.extend(f'{group}:{name}' for name in sorted(set(manifest['inputs'][group]) | set(current[group]))
+                           if current[group].get(name) != manifest['inputs'][group].get(name))
         old, new = manifest['inputs']['source'], current['source']
         changed.extend(name for name in sorted(set(old['files']) | set(new['files']))
                        if old['files'].get(name) != new['files'].get(name))
@@ -329,6 +337,8 @@ def validate_completion(session, current_pr_head=None):
             from .codex_council import validate_session
         except ImportError:
             from codex_council import validate_session
+        if not isinstance(read_json(session / 'session.json'), dict):
+            raise ValueError('session metadata must be an object')
         problems.extend(validate_session(session)['problems'])
         if state['state'] != 'unchanged':
             problems.append('inputs are ' + state['state'])
@@ -343,6 +353,8 @@ def validate_completion(session, current_pr_head=None):
                 raise ValueError('evidence record integrity mismatch')
             if record['snapshot_id'] != manifest['snapshot_id']:
                 raise ValueError('evidence belongs to different inputs')
+            if not isinstance(record.get('artifact_hashes'), dict):
+                raise ValueError('evidence artifact hashes must be an object')
             if any(file_hash(session, name) != value for name, value in record['artifact_hashes'].items()):
                 raise ValueError('evidence artifact changed')
             payload = {k: v for k, v in record.items() if k not in {
